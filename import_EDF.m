@@ -62,7 +62,7 @@ else
     
     %Import EDF data and annotations
     % edfData = edfread(filePath);
-    [edfData, annot] = edfread(filePath, 'TimeOutputType', 'datetime' );
+    [edfData, annot] = edfread(filePath, 'TimeOutputType', 'datetime');
     info = edfinfo(filePath);
     annot = timetable2table(annot,'ConvertRowTimes',true);
     
@@ -75,11 +75,9 @@ else
     sPerCell = mode(seconds(varTime));
     if sPerCell == 1
         sRate = info.NumSamples(1);
-    else
+    else    %FIX when cells contain 2 seconds of data instead of 1 and wrong sRate
         sRate = info.NumSamples(1)/sPerCell;
-        %         startTime = edfTime(1);
         correctSize = length(edfTime)*sPerCell;
-        %         correctTimes = zeros(correctSize,1);
         correctTimes(1) = edfTime(1);
         for i = 2:correctSize
             correctTimes(i,:) = correctTimes(i-1)+seconds(1);
@@ -207,8 +205,9 @@ else
     end
     EEG = eeg_checkset(EEG);
     
-    EEG.data = bsxfun(@minus, eegData, mean(EEG.data,2));
-    pop_eegplot(EEG,1,1,1);
+    %For testing
+%     EEG.data = bsxfun(@minus, eegData, mean(EEG.data,2));  %remove mean
+%     pop_eegplot(EEG,1,1,1);
         
 end
 end
