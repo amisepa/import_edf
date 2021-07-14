@@ -1,6 +1,9 @@
-%% import_EDF()
-% Imports European Data Formatted (EDF) data and converts it to the EEGLAB format
-% Compatible with EDF-/EDF+/EDF+C/EDF+D data
+import_EDF()
+
+Imports European Data Formatted (EDF) data and converts it to the EEGLAB format
+
+Compatible with EDF-/EDF+/EDF+C/EDF+D data
+
 % This function uses the Matlab's edfread function from Matlab R2020b or later AND the Signal processing toolbox
 %
 % Usage:
