@@ -1,13 +1,19 @@
 %% import_EDF() 
 % Imports European Data Formatted (EDF) data and converts it to the EEGLAB format
-% Compatible with EDF-/EDF+/EDF+C/EDF+D data
-% This function uses the Matlab's edfread function from Matlab R2020b or later AND the Signal processing toolbox 
-%
+% Compatible with EDF-,EDF+,EDF+C,EDF+D data
+% 
+% This function uses the Matlab's edfread function from Matlab R2020b or later 
+% AND the Signal processing toolbox.
+% 
+% For discontinuous data: automatically merge segments into one conitnuous
+% dataset, and inserts a boundary so that EEGLAB filters automatically
+% correctes DF offsets changes between segments.
+% 
 % Usage:
 %   eeglab
-%   EEG = import_EDF;               % load EDF file with pop-up window mode
+%   EEG = import_EDF;               %pop-up window mode
 %   or
-%   EEG = import_EDF(filePath);     %load EDF file with full file name and path provided
+%   EEG = import_EDF(filePath);     %command mode: filePath must be a character string)
 %
 % Output:
 %   EEG structure in EEGLAB format
@@ -18,7 +24,7 @@
 % [1] Kemp, Bob, Alpo Värri, Agostinho C. Rosa, Kim D. Nielsen, and John Gade. “A Simple Format for Exchange of Digitized Polygraphic Recordings.” Electroencephalography and Clinical Neurophysiology 82, no. 5 (May 1992): 391–93. https://doi.org/10.1016/0013-4694(92)90009-7.
 % [2] Kemp, Bob, and Jesus Olivan. "European Data Format 'plus' (EDF+), an EDF Alike Standard Format for the Exchange of Physiological Data." Clinical Neurophysiology 114, no. 9 (2003): 1755–1761. https://doi.org/10.1016/S1388-2457(03)00123-8.
 %
-% More on EDF: https://www.edfplus.info/index.html
+% More on EDF+: https://www.edfplus.info/index.html
 %
 % Author: Cedric Cannard, July 2021
 %
@@ -49,7 +55,7 @@ if matlab_version < 990 && ~license('test', 'Signal_Toolbox')
 else
     disp('Matlab version > 2020a and Signal processing toolbox succesfully detected: importing EDF+ data...');
     
-    if ~exist('ALLEEG','var'), eeglab; end
+%     if ~exist('ALLEEG','var'), eeglab; end
     EEG = eeg_emptyset;
     
     %Get filename and path
@@ -76,6 +82,7 @@ else
     if sPerCell == 1
         sRate = info.NumSamples(1);
     else    %FIX when cells contain 2 seconds of data instead of 1 and wrong sRate
+        discontinuous = true;
         sRate = info.NumSamples(1)/sPerCell;
         correctSize = length(edfTime)*sPerCell;
         correctTimes(1) = edfTime(1);
@@ -87,9 +94,26 @@ else
     %Check sample rate stability
     nSrate = 1./seconds(unique(varTime));
     nSrate(isinf(nSrate)) = [];
-    if (max(nSrate)-min(nSrate))/max(nSrate) > 0.01
-        warning('Sampling rate varies: Data is either discontinuous (TAKEN CARE OF) or something is wrong with your sample rate (NOT TAKEN CARE OF)');
+    
+    %CONTINUOUS DATA
+    if ~discontinuous
+        disp('Continuous data detected.');
+        if (max(nSrate)-min(nSrate))/max(nSrate) > 0.01
+            warning('Sampling rate unstable! This can be a serious problem!');
+        end
+        for iEv = 1:size(annot,1)
+            EEG.event(iEv,:).type = char(table2array(annot(iEv,2)));
+            latency = datenum(datetime(table2array(annot(iEv,1)), 'Format', 'HH:mm:ss:SSS'));
+            latency = latency - datenum(datetime(edfTime(1), 'Format', 'HH:mm:ss:SSS'));
+            EEG.event(iEv,:).latency = round(latency*24*60*60*sRate);   %correct latency in ms
+            EEG.event(iEv,:).urevent = iEv;
+        end
+        EEG = eeg_checkset(EEG);
         
+    %DISCONTINUOUS DATA
+    else
+        disp('Discontinuous data detected!');
+
         %Boundaries
         index(2:length(varTime)+1,:) = varTime ~= mode(varTime);
         bound = find(index);
@@ -141,22 +165,9 @@ else
             EEG.event(iEv,:).latency = round(latency*24*60*60*sRate);   %latency in ms
             EEG.event(iEv,:).type = char(ev(iEv).type);
             EEG.event(iEv,:).urevent = iEv;
+            
         end
         EEG = eeg_checkset(EEG);
-                
-    else
-        disp('Continuous data detected.');
-        
-        %Events
-        for iEv = 1:size(annot,1)
-            EEG.event(iEv,:).type = char(table2array(annot(iEv,2)));
-            latency = datenum(datetime(table2array(annot(iEv,1)), 'Format', 'HH:mm:ss:SSS'));
-            latency = latency - datenum(datetime(edfTime(1), 'Format', 'HH:mm:ss:SSS'));
-            EEG.event(iEv,:).latency = round(latency*24*60*60*sRate);   %correct latency in ms
-            EEG.event(iEv,:).urevent = iEv;
-        end
-        EEG = eeg_checkset(EEG);
-        
     end
     
     %EEG data
@@ -205,9 +216,30 @@ else
     end
     EEG = eeg_checkset(EEG);
     
+    %Add boundaries between segments so that EEGLAB filters can
+    %automatically correct DC offsets
+    if discontinuous
+        for iEv = 1:length(ev)
+            if isempty(ev(iEv).removed_gap)
+                ev(iEv).removed_gap = duration('00:00:00');
+            end
+        end
+        count = 1;
+        for iEv = 2:length(ev)
+            if ev(iEv).removed_gap ~= ev(iEv-1).removed_gap
+                dc_offset(count,1) = EEG.event(iEv,:).latency+1;
+                dc_offset(count,2) = EEG.event(iEv,:).latency+5;
+                count = count+1;
+            end
+        end
+        EEG = pop_select(EEG, 'nopoint', dc_offset);  %add boundary at DC offset
+        EEG = eeg_checkset(EEG);
+    end
+            
     %For testing
-%     EEG.data = bsxfun(@minus, eegData, mean(EEG.data,2));  %remove mean
-%     pop_eegplot(EEG,1,1,1);
+    EEG.data = bsxfun(@minus, EEG.data, mean(EEG.data,2));  %remove mean
+    pop_eegplot(EEG,1,1,1);
+    EEG = eeg_checkset(EEG);
         
 end
 end
