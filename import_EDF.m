@@ -81,6 +81,7 @@ else
     sPerCell = mode(seconds(varTime));
     if sPerCell == 1
         sRate = info.NumSamples(1);
+        discontinuous = false;
     else    %FIX when cells contain 2 seconds of data instead of 1 and wrong sRate
         discontinuous = true;
         sRate = info.NumSamples(1)/sPerCell;
