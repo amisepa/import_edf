@@ -233,20 +233,20 @@ else
         count = 1;
         for iEv = 2:length(ev)
             if ev(iEv).removed_gap ~= ev(iEv-1).removed_gap
-                dc_offset(count,1) = EEG.event(iEv,:).latency-2;
-                dc_offset(count,2) = EEG.event(iEv,:).latency-1;
+                dc_offset(count,1) = EEG.event(iEv,:).latency1;
+                dc_offset(count,2) = EEG.event(iEv,:).latency+1;
                 count = count+1;
             end
         end
-%         EEG = pop_select(EEG, 'nopoint', dc_offset);  %add boundary at DC offset
-        EEG = eeg_eegrej(EEG, dc_offset);
+        EEG = pop_select(EEG, 'nopoint', dc_offset);  %add boundary at DC offset
+        EEG = eeg_eegrej( EEG, dc_offset );
         EEG = eeg_checkset(EEG);
     end
     
-%     %For testing
-%     EEG.data = bsxfun(@minus, EEG.data, mean(EEG.data,2));  %remove mean
-%     pop_eegplot(EEG,1,1,1);
-%     EEG = eeg_checkset(EEG);
+    %For testing
+    EEG.data = bsxfun(@minus, EEG.data, mean(EEG.data,2));  %remove mean
+    pop_eegplot(EEG,1,1,1);
+    EEG = eeg_checkset(EEG);
         
 end
 end
