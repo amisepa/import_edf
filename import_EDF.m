@@ -221,7 +221,13 @@ else
     if discontinuous
         
         %index empty events
-        rm_ev = contains(string({ev.type}),'end');
+        for iEv = 1:length(ev)
+            if isempty(ev(iEv).seg)
+                rm_ev(iEv) = true;
+            else
+                rm_ev(iEv) = false;                
+            end
+        end
         ev(rm_ev) = [];
         EEG = pop_editeventvals(EEG,'delete', find(rm_ev));
         
