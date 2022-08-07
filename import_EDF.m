@@ -179,12 +179,18 @@ else
             cellData = edfData{iChan,iCell};
             if sPerCell == 1     %data with correct sample rate at import
                 eegData(iChan, sample:sample+sRate-1) = cellData;
-                %                 sample = sample + length(edfData{iChan,iCell});
+                % sample = sample + length(edfData{iChan,iCell});
                 sample = sample + sRate;
-            else  %for data with incorrect sample rate at import (e.g. RKS05 test file)
+            else  
+                % data with incorrect sample rate at import (e.g. RKS05 or RKS09)
                 for iSec = 1:sPerCell
-                    eegData(iChan, sample:sample+sRate-1) = cellData(iSec:iSec+sRate-1);
-                    sample = sample + sRate;
+                    if iSec == 1
+                        eegData(iChan, sample:sample+sRate-1) = cellData(iSec:iSec*sRate);
+                        sample = sample + sRate;
+                    else
+                        eegData(iChan, sample:sample+sRate-1) = cellData(((iSec-1)*sRate)+1 : (iSec)*sRate);
+                        sample = sample + sRate;
+                    end
                 end
             end
         end
