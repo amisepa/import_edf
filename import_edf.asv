@@ -220,17 +220,14 @@ else
     % automatically correct DC offsets
 %     if ~continuous
         
-    % Check for discontinuities (flat line segments longer than 5 s)
+    % remove flat line segments longer than 5 s
     for iChan = 1:EEG.nbchan
         zero_intervals = reshape(find(diff([false abs(diff(EEG.data(iChan,:)))<(20*eps) false])),2,[])';
         idx = zero_intervals(:,2) - zero_intervals(:,1) > 0.083*EEG.srate;
-    end
-
-    % Remove flat segments and insert boundary
-    if sum(idx) > 0
-        EEG = eeg_eegrej(EEG, zero_intervals(idx,:));
         warning([num2str(sum(idx)) ' flat segments longer than 5 s were detected and removed.'])
     end
+    % Remove flat segment and insert boundary
+    EEG = eeg_eegrej(EEG, zero_intervals(idx,:));
 
 %         pop_eegplot(EEG,1,1,1)
 % 
