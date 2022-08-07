@@ -87,7 +87,7 @@ else
     end
         
     % CONTINUOUS DATA
-    if continuous
+%     if continuous
         
         % Check sample rate stability
         nSrate = 1./seconds(unique(varTime));
@@ -106,7 +106,7 @@ else
         end
         
     % DISCONTINUOUS DATA
-    else
+%     else
 
         % Gap bounds
 %         idx(2:length(varTime)+1,:) = varTime ~= mode(varTime);
@@ -131,16 +131,16 @@ else
 %             count = count+1;
 %         end
         
-        % Events and corresponding segment
-        for iEv = 1:size(annot,1)
-            ev(iEv,:).type = table2array(annot(iEv,2));
-            ev(iEv,:).lat = datetime(table2array(annot(iEv,1)),'Format','HH:mm:ss:SSS');
-%             for iSeg = 1:length(seg)
-%                 if isbetween(ev(iEv,:).lat, seg(iSeg,1), seg(iSeg,2))
-%                     ev(iEv,:).seg = iSeg;
-%                 end
-%             end
-        end
+%         % Events and corresponding segment
+%         for iEv = 1:size(annot,1)
+%             ev(iEv,:).type = table2array(annot(iEv,2));
+%             ev(iEv,:).lat = datetime(table2array(annot(iEv,1)),'Format','HH:mm:ss:SSS');
+% %             for iSeg = 1:length(seg)
+% %                 if isbetween(ev(iEv,:).lat, seg(iSeg,1), seg(iSeg,2))
+% %                     ev(iEv,:).seg = iSeg;
+% %                 end
+% %             end
+%         end
         
 %         % Events corrected for gap removal
 %         for iEv = 1:length(ev)
@@ -153,16 +153,16 @@ else
 %             end
 %         end
         
-        % Get event latencies adjusted to time 0 and in ms
-        for iEv = 1:length(ev)
-            latency = datenum(ev(iEv).lat) - datenum(datetime(edfTime(1), 'Format', 'HH:mm:ss:SSS'));
-%             latency = datenum(ev(iEv).correct_lat) - datenum(datetime(edfTime(1), 'Format', 'HH:mm:ss:SSS'));
-            EEG.event(iEv,:).latency = round(latency*24*60*60*sRate);   %latency in ms
-            EEG.event(iEv,:).type = char(ev(iEv).type);
-            EEG.event(iEv,:).urevent = iEv;
-        end
-        EEG = eeg_checkset(EEG);
-    end
+%         % Get event latencies adjusted to time 0 and in ms
+%         for iEv = 1:length(ev)
+%             latency = datenum(ev(iEv).lat) - datenum(datetime(edfTime(1), 'Format', 'HH:mm:ss:SSS'));
+% %             latency = datenum(ev(iEv).correct_lat) - datenum(datetime(edfTime(1), 'Format', 'HH:mm:ss:SSS'));
+%             EEG.event(iEv,:).latency = round(latency*24*60*60*sRate);   %latency in ms
+%             EEG.event(iEv,:).type = char(ev(iEv).type);
+%             EEG.event(iEv,:).urevent = iEv;
+%         end
+%         EEG = eeg_checkset(EEG);
+%     end
     
     % EEG data
     edfData = table2array(edfData)';
