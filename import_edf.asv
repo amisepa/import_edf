@@ -1,10 +1,10 @@
-%% import_edf() - Imports European Data Formatted (EDF) data and
+%% import_edf() - Imports European Data Formatted (EDF) data and 
 % converts it to the EEGLAB format. Compatible with EDF-/EDF+/EDF+C/EDF+D.
-%
+% 
 % For discontinuous data: automatically merge segments into one continuous
 % dataset, and inserts a boundary so that EEGLAB filters automatically
 % corrects DF offsets at the boundary.
-%
+% 
 % Usage:
 %   eeglab
 %   EEG = import_EDF;               %pop-up window mode
@@ -13,12 +13,12 @@
 % Output: EEG structure with raw signal in the EEGLAB format (ready for
 % processing)
 %
-% Requirements: Matlab R2020b or later AND the Signal processing toolbox
-%
+% Requirements: Matlab R2020b or later AND the Signal processing toolbox 
+% 
 % EDF+ ressource: https://www.edfplus.info/index.html
 %
 % Copyright (C) - July 2021, Cedric Cannard, ccannard@pm.me
-%
+% 
 % 8.7.2022: fix duplicate seconds (e.g., for edf files with 2 s of data in each cell)
 
 
@@ -33,11 +33,11 @@ if matlab_version < 990 && ~license('test', 'Signal_Toolbox')
         'or use EEGLAB''s Biosig toolbox']);
     return
 else
-    %     disp('Matlab version > 2020a and Signal processing toolbox succesfully detected: importing EDF+ data...');
-
+%     disp('Matlab version > 2020a and Signal processing toolbox succesfully detected: importing EDF+ data...');
+    
     % initialize EEGLAB structure
     EEG = eeg_emptyset;
-
+    
     % filename and path
     if nargin == 0
         [fileName, filePath] = uigetfile2({ '*.edf' }, 'Select .EDF file');
@@ -54,7 +54,7 @@ else
     [edfData, annot] = edfread(filePath, 'TimeOutputType', 'datetime');
     info = edfinfo(filePath);
     annot = timetable2table(annot,'ConvertRowTimes',true);
-
+    
     % Timestamps
     edfTime = timetable2table(edfData,'ConvertRowTimes',true);
     edfTime = datetime(table2array(edfTime(:,1)), 'Format', 'HH:mm:ss:SSS');
@@ -66,22 +66,22 @@ else
         sRate = info.NumSamples(1);
     else
         sRate = info.NumSamples(1)/sPerCell;
-        %         correctSize = length(edfTime)*sPerCell;
-        %         correctTimes(1) = edfTime(1);
-        %         for i = 2:correctSize
-        %             correctTimes(i,:) = correctTimes(i-1) + seconds(1);
-        %         end
-        %         edfTime = correctTimes;
+%         correctSize = length(edfTime)*sPerCell;
+%         correctTimes(1) = edfTime(1);
+%         for i = 2:correctSize
+%             correctTimes(i,:) = correctTimes(i-1) + seconds(1);
+%         end
+%         edfTime = correctTimes; 
     end
-
+    
     % Detect if data are discontinuous
     idx = varTime > seconds(sPerCell+1);
     if sum(idx) > 0
-        %         continuous = false;
+%         continuous = false;
         warning([num2str(sum(idx)+1) ' discontinuous segments were detected. Merging segments into one continuous one.' ...
             'Boundaries are inserted between segments to correct DC offsets with eeglab  filters (automatic).'])
     else
-        %         continuous = true;
+%         continuous = true;
 
         % Check sample rate stability
         nSrate = 1./seconds(unique(varTime));
@@ -90,16 +90,79 @@ else
             warning('Sampling rate unstable! This can be a serious problem!');
         end
     end
+        
+    % CONTINUOUS DATA
+%     if continuous
+        
+        
+        % Markers latency and name
+        for iEv = 1:size(annot,1)
+            EEG.event(iEv,:).type = char(table2array(annot(iEv,2)));
+            latency = datenum(datetime(table2array(annot(iEv,1)), 'Format', 'HH:mm:ss:SSS'));
+            latency = latency - datenum(edfTime(1));
+            EEG.event(iEv,:).latency = round(latency*24*60*60*sRate);   % latency in ms
+            EEG.event(iEv,:).urevent = iEv;
+        end
+        
+    % DISCONTINUOUS DATA
+%     else
 
-    % Markers latency and name
-    for iEv = 1:size(annot,1)
-        EEG.event(iEv,:).type = char(table2array(annot(iEv,2)));
-        latency = datenum(datetime(table2array(annot(iEv,1)), 'Format', 'HH:mm:ss:SSS'));
-        latency = latency - datenum(edfTime(1));
-        EEG.event(iEv,:).latency = round(latency*24*60*60*sRate);   % latency in sample
-        EEG.event(iEv,:).urevent = iEv;
-    end
+        % Gap bounds
+%         idx(2:length(varTime)+1,:) = varTime ~= mode(varTime);
+%         bound = find(idx);
 
+%         % Gap durations
+%         for iGap = 1:length(bound)
+%             gaps(iGap) = edfTime(bound(iGap)) - edfTime(bound(iGap)-1);
+%         end
+        
+%         % Segments
+%         seg(1,1) = edfTime(1);
+%         seg(1,2) = edfTime(bound(1)-1);
+%         count = 2;
+%         for iSeg = 1:length(bound)
+%             seg(count,1) = edfTime(bound(iSeg));
+%             if iSeg ~= length(bound)
+%                 seg(count,2) = edfTime(bound(iSeg+1)-1);
+%             else
+%                 seg(count,2) = edfTime(end);
+%             end
+%             count = count+1;
+%         end
+        
+%         % Events and corresponding segment
+%         for iEv = 1:size(annot,1)
+%             ev(iEv,:).type = table2array(annot(iEv,2));
+%             ev(iEv,:).lat = datetime(table2array(annot(iEv,1)),'Format','HH:mm:ss:SSS');
+% %             for iSeg = 1:length(seg)
+% %                 if isbetween(ev(iEv,:).lat, seg(iSeg,1), seg(iSeg,2))
+% %                     ev(iEv,:).seg = iSeg;
+% %                 end
+% %             end
+%         end
+        
+%         % Events corrected for gap removal
+%         for iEv = 1:length(ev)
+%             if ev(iEv).seg > 1          %for segments after 1st gap
+%                 gap = sum(gaps(1:ev(iEv).seg - 1));
+%                 ev(iEv,:).removed_gap = gap;
+%                 ev(iEv,:).correct_lat = ev(iEv,:).lat - gap;
+%             elseif ev(iEv,:).seg == 1   %segment before 1st gap
+%                 ev(iEv,:).correct_lat = ev(iEv,:).lat;
+%             end
+%         end
+        
+%         % Get event latencies adjusted to time 0 and in ms
+%         for iEv = 1:length(ev)
+%             latency = datenum(ev(iEv).lat) - datenum(datetime(edfTime(1), 'Format', 'HH:mm:ss:SSS'));
+% %             latency = datenum(ev(iEv).correct_lat) - datenum(datetime(edfTime(1), 'Format', 'HH:mm:ss:SSS'));
+%             EEG.event(iEv,:).latency = round(latency*24*60*60*sRate);   %latency in ms
+%             EEG.event(iEv,:).type = char(ev(iEv).type);
+%             EEG.event(iEv,:).urevent = iEv;
+%         end
+%         EEG = eeg_checkset(EEG);
+%     end
+    
     % EEG data
     edfData = table2array(edfData)';
     eegData = [];
@@ -111,7 +174,7 @@ else
                 eegData(iChan, sample:sample+sRate-1) = cellData;
                 % sample = sample + length(edfData{iChan,iCell});
                 sample = sample + sRate;
-            else
+            else  
                 % data with incorrect sample rate at import (e.g. RKS05 or RKS09)
                 for iSec = 1:sPerCell
                     if iSec == 1
@@ -125,13 +188,13 @@ else
             end
         end
     end
-
+    
     % EEGLAB structure
     if exist('fileName','var')
         EEG.setname = fileName(1:end-4);
     else
         EEG.setname = 'EEG data';
-    end
+    end        
     EEG.srate = sRate;
     EEG.data = eegData;
     EEG.nbchan = size(EEG.data,1);
@@ -142,7 +205,7 @@ else
     EEG.recording = char(info.Recording);
     EEG.unit = char(info.PhysicalDimensions);
     EEG = eeg_checkset(EEG);
-
+    
     % Channel labels
     chanLabels = erase(upper(info.SignalLabels ),".");
     if ~ischar(chanLabels)
@@ -151,7 +214,11 @@ else
         end
     end
     EEG = eeg_checkset(EEG);
-
+    
+    % Add boundaries between segments so that EEGLAB filters can
+    % automatically correct DC offsets
+%     if ~continuous
+        
     % Check for discontinuities (flat line segments longer than 5 s)
     for iChan = 1:EEG.nbchan
         zero_intervals = reshape(find(diff([false abs(diff(EEG.data(iChan,:)))<(20*eps) false])),2,[])';
@@ -163,9 +230,42 @@ else
         warning([num2str(sum(idx)) ' flat segments longer than 5 s detected (i.e., discontinuous data)! Removing them.'])
         EEG = eeg_eegrej(EEG, zero_intervals(idx,:));
     end
-    
-    % Final check of the eeglab structure
-    EEG = eeg_checkset(EEG);
+
+%         pop_eegplot(EEG,1,1,1)
+% 
+%         gaps = find(idx);
+%         for iGap = 1:length(gaps)
+%             gapsBounds(iGap,1) = datetime(edfTime(gaps(iGap)),'Format', 'HH:mm:ss:SSS') - edfTime(1);
+%             gapsBounds(iGap,2) = gapsBounds(iGap,1) + varTime(gaps(iGap));
+%         end
+        
+        % index events indicating a gap between segments
+%         for iEv = 1:length(ev)
+%             if isempty(ev(iEv).seg)
+%                 rm_ev(iEv) = true;
+%             else
+%                 rm_ev(iEv) = false;                
+%             end
+%         end
+%         ev(rm_ev) = [];
+%         EEG = pop_editeventvals(EEG,'delete', find(rm_ev));
+        
+%         for iEv = 1:length(ev)
+%             if isempty(ev(iEv).removed_gap)
+%                 ev(iEv).removed_gap = duration('00:00:00');
+%             end
+%         end
+%         count = 1;
+%         for iEv = 2:length(ev)
+%             if ev(iEv).removed_gap ~= ev(iEv-1).removed_gap
+%                 dc_offset(count,1) = EEG.event(iEv,:).latency-2;
+%                 dc_offset(count,2) = EEG.event(iEv,:).latency-1;
+%                 count = count+1;
+%             end
+%         end
+%     end
+
+EEG = eeg_checkset(EEG);
 
 end
 
