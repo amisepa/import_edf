@@ -1,7 +1,5 @@
-%% import_edf() 
-% 
-% Imports European Data Formatted (EDF) data and converts it to the EEGLAB
-% format. Compatible with EDF-, EDF+, EDF+C, EDF+D data.
+%% import_edf() - Imports European Data Formatted (EDF) data and 
+% converts it to the EEGLAB format. Compatible with EDF-/EDF+/EDF+C/EDF+D.
 % 
 % For discontinuous data: automatically merge segments into one continuous
 % dataset, and inserts a boundary so that EEGLAB filters automatically
@@ -84,17 +82,18 @@ else
             'Boundaries are inserted between segments to correct DC offsets with eeglab  filters (automatic).'])
     else
         continuous = true;
-    end
-        
-    % CONTINUOUS DATA
-%     if continuous
-        
+
         % Check sample rate stability
         nSrate = 1./seconds(unique(varTime));
         nSrate(isinf(nSrate)) = [];
         if (max(nSrate)-min(nSrate))/max(nSrate) > 0.01
             warning('Sampling rate unstable! This can be a serious problem!');
         end
+    end
+        
+    % CONTINUOUS DATA
+%     if continuous
+        
         
         % Markers latency and name
         for iEv = 1:size(annot,1)
@@ -228,8 +227,8 @@ else
 
     % Remove flat segments and insert boundary
     if sum(idx) > 0
+        warning([num2str(sum(idx)) ' flat segments longer than 5 s detected (i.e., discontinuous data)! Removing them.'])
         EEG = eeg_eegrej(EEG, zero_intervals(idx,:));
-        warning([num2str(sum(idx)) ' flat segments longer than 5 s were detected and removed.'])
     end
 
 %         pop_eegplot(EEG,1,1,1)
@@ -264,7 +263,6 @@ else
 %                 count = count+1;
 %             end
 %         end
-
 %     end
 
 EEG = eeg_checkset(EEG);
