@@ -8,6 +8,7 @@ REQUIREMENTS: This function uses the Matlab's edfread function from Matlab R2020
 and is implemented in EEGLAB.
 
 GUI mode: 
+
 ![](https://github.com/amisepa/import_edf/blob/main/plugin_illustration.png)
 
 Command line usage:
