@@ -16,7 +16,7 @@ Usage:
 Output:
  EEG structure in EEGLAB format
 
-![](https://github.com/amisepa/import_edf/blob/main/README.md/plugin_illustration.png)
+![](https://github.com/amisepa/import_edf/blob/main/plugin_illustration.png)
 
 
 References for Matlab's edfRead function:
