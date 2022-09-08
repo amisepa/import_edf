@@ -49,6 +49,6 @@ menui = findobj(fig, 'tag', 'import data');
 comcnt = [trystrs.no_check 'EEG = import_edf;'  catchstrs.new_non_empty];
 
 % Create menus
-uimenu(menui, 'label', 'From EDF+ files (alternative to BIOSIG toolbox)', 'separator', 'on', 'callback', comcnt);
+uimenu(menui, 'label', 'From EDF+ files (using MATLAB edfread)', 'separator', 'on', 'callback', comcnt);
 
 end
