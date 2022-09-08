@@ -7,8 +7,8 @@
 %
 % Usage:
 %   eeglab
-%   EEG = import_EDF;               %pop-up window mode
-%   EEG = import_EDF(filePath);     %command mode: filePath (cell with character string or character string)
+%   EEG = import_edf;               %pop-up window mode
+%   EEG = import_edf(filePath);     %command mode: filePath (cell with character string or character string)
 %
 % Output: EEG structure with raw signal in the EEGLAB format (ready for
 % processing)
@@ -21,7 +21,6 @@
 %
 % 8.7.2022: fix duplicate seconds (e.g., for edf files with 2 s of data in each cell)
 
-
 function EEG = import_edf(inputname)
 
 % Check for Matlab version and Signal processing toolbox
@@ -33,7 +32,6 @@ if matlab_version < 990 && ~license('test', 'Signal_Toolbox')
         'or use EEGLAB''s Biosig toolbox']);
     return
 else
-    %     disp('Matlab version > 2020a and Signal processing toolbox succesfully detected: importing EDF+ data...');
 
     % initialize EEGLAB structure
     EEG = eeg_emptyset;
@@ -66,23 +64,14 @@ else
         sRate = info.NumSamples(1);
     else
         sRate = info.NumSamples(1)/sPerCell;
-        %         correctSize = length(edfTime)*sPerCell;
-        %         correctTimes(1) = edfTime(1);
-        %         for i = 2:correctSize
-        %             correctTimes(i,:) = correctTimes(i-1) + seconds(1);
-        %         end
-        %         edfTime = correctTimes;
     end
 
     % Detect if data are discontinuous
     idx = varTime > seconds(sPerCell+1);
     if sum(idx) > 0
-        %         continuous = false;
         warning([num2str(sum(idx)+1) ' discontinuous segments were detected. Merging segments into one continuous one.' ...
             'Boundaries are inserted between segments to correct DC offsets with eeglab  filters (automatic).'])
     else
-        %         continuous = true;
-
         % Check sample rate stability
         nSrate = 1./seconds(unique(varTime));
         nSrate(isinf(nSrate)) = [];
@@ -109,7 +98,6 @@ else
             cellData = edfData{iChan,iCell};
             if sPerCell == 1     %data with correct sample rate at import
                 eegData(iChan, sample:sample+sRate-1) = cellData;
-                % sample = sample + length(edfData{iChan,iCell});
                 sample = sample + sRate;
             else
                 % data with incorrect sample rate at import (e.g. RKS05 or RKS09)
