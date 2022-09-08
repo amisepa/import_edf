@@ -1,4 +1,4 @@
-# import_EDF()
+# import_edf()
 
 Imports European Data Formatted (EDF) data and converts it to the EEGLAB format
 
@@ -11,9 +11,9 @@ and is implemented in EEGLAB.
 
 Usage:
    eeglab
-   EEG = import_EDF;               % load EDF file with pop-up window mode
+   EEG = import_edf;               % load EDF file with pop-up window mode
    or
-   EEG = import_EDF(filePath);     %load EDF file with full file name and path provided
+   EEG = import_edf(filePath);     %load EDF file with full file name and path provided
 
 Output:
  EEG structure in EEGLAB format
