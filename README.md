@@ -13,11 +13,11 @@ GUI mode:
 
 Command line usage:
 
-   'eeglab; close; EEG = import_edf;            % import EDF file with pop-up window mode to select the file'
+   eeglab; close; EEG = import_edf;            % import EDF file with pop-up window mode to select the file
    
    or 
    
-   'EEG = import_edf('path to your file');      % import with full file path provided (char string)
+   EEG = import_edf('path to your file');      % import with full file path provided (char string)
 
 Output: EEG structure in EEGLAB format
 
