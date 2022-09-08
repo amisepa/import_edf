@@ -16,6 +16,9 @@ Usage:
 Output:
  EEG structure in EEGLAB format
 
+![](https://github.com/amisepa/import_edf/blob/main/README.md/plugin_illustration.png)
+
+
 References for Matlab's edfRead function:
 
 [1] Kemp, Bob, Alpo Värri, Agostinho C. Rosa, Kim D. Nielsen, and John Gade. “A Simple Format for Exchange of Digitized Polygraphic Recordings.” Electroencephalography and Clinical Neurophysiology 82, no. 5 (May 1992): 391–93. https://doi.org/10.1016/0013-4694(92)90009-7.
