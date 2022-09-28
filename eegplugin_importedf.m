@@ -34,13 +34,10 @@ if nargin < 3
 end
 
 % plugin version
-vers = 'eegplugin_importedf1.1';
+vers = 'import_edf1.1';
 
 % path
-addpath(genpath(fileparts(which('import_edf.m'))));
-% p = which('eegplugin_importedf.m');
-% p = p(1:strfind(p,'eegplugin_importedf.m')-1);
-% if ~exist('eegplugin_importedf','dir'), addpath(p); end
+addpath(genpath(fileparts(which('import_edfdata.m'))));
 
 % Find menu
 menui = findobj(fig, 'tag', 'import data');
@@ -49,6 +46,6 @@ menui = findobj(fig, 'tag', 'import data');
 comcnt = [trystrs.no_check 'EEG = import_edf;'  catchstrs.new_non_empty];
 
 % Create menus
-uimenu(menui, 'label', 'From EDF+ files (using MATLAB edfread)', 'separator', 'on', 'callback', comcnt);
+uimenu(menui, 'label', 'From EDF/EDF+ files (using MATLAB edfread)', 'separator', 'on', 'callback', comcnt);
 
 end
