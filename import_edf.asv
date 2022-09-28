@@ -149,16 +149,17 @@ EEG = eeg_checkset(EEG);
 % Check for discontinuities (flat line segments longer than 5 s)
 for iChan = 1:EEG.nbchan
     zero_intervals = reshape(find(diff([false abs(diff(EEG.data(iChan,:)))<(20*eps) false])),2,[])';
-%     idx = zero_intervals(:,2) - zero_intervals(:,1) > 0.083*EEG.srate;
-    idx = zero_intervals(:,2) - zero_intervals(:,1) > 5*EEG.srate;
+    idx = zero_intervals(:,2) - zero_intervals(:,1) > 0.083*EEG.srate;
+%     idx = zero_intervals(:,2) - zero_intervals(:,1) > 5*EEG.srate;
 end
 
 % Remove flat segments and insert boundary
 if sum(idx) > 0
     warning(['Removing ' num2str(sum(idx)) ' flat segment(s) longer than 5 s (discontinuous data).'])
-%     oriEEG = EEG;
+    oriEEG = EEG;
     EEG = eeg_eegrej(EEG, zero_intervals(idx,:));
-%     vis_artifacts(EEG,oriEEG);
+    vis_artifacts(EEG,oriEEG);
+    pop_eegplot(EEG,1,1,1)
 end
 
 % Remove DC drifts 
