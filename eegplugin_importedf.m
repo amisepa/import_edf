@@ -34,7 +34,7 @@ if nargin < 3
 end
 
 % plugin version
-vers = 'import_edf1.1';
+vers = 'import_edf1.2';
 
 % path
 addpath(genpath(fileparts(which('import_edfdata.m'))));
