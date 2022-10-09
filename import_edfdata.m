@@ -7,9 +7,9 @@
 %
 % Usage:
 %       eeglab
-%       EEG = import_edf;               % pop-up window mode
-%       EEG = import_edf(filePath);     % command mode: filePath (cell with character string or character string)
-%       EEG = import_edf(filePath, 1);  % 2nd input to remove DC drifts (1) or not (0)
+%       EEG = import_edfdata;               % pop-up window mode
+%       EEG = import_edfdata(filePath);     % command mode: filePath (cell with character string or character string)
+%       EEG = import_edfdata(filePath, 1);  % 2nd input to remove DC drifts (1) or not (0)
 %
 % Output: 
 %       EEG structure with raw signal in the EEGLAB format (ready for processing)
@@ -23,7 +23,7 @@
 % 8.7.2022: fix duplicate seconds (e.g., for edf files with 2 s of data in each cell)
 % 9.28.2022: fix matlab version check and added option to remove DC drifts
 
-function EEG = import_edf(inputname, rmdrift)
+function EEG = import_edfdata(inputname, rmdrift)
 
 % set remove drift off if not set by user
 if nargin < 2 || isempty(rmdrift)
@@ -39,6 +39,11 @@ if str2double(matver(1:2)) < 20  && ~license('test', 'Signal_Toolbox')
         'or use EEGLAB''s Biosig toolbox']);
 end
 
+% check that user dsoesn't have another edfread funcion downloaded
+tmp = which('edfread');
+if ~strcmp(tmp(end-30:end-2), 'toolbox\signal\signal\edfread')
+    errordlg('You have another edfread function on your computer that may cause errors. Please delete or remove its path.')
+end
 
 % Initialize EEGLAB structure
 EEG = eeg_emptyset;
