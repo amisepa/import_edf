@@ -7,9 +7,9 @@
 %
 % Usage:
 %       eeglab
-%       EEG = import_edfdata;               % pop-up window mode
-%       EEG = import_edfdata(filePath);     % command mode: filePath (cell with character string or character string)
-%       EEG = import_edfdata(filePath, 1);  % 2nd input to remove DC drifts (1) or not (0)
+%       EEG = import_edf;               % pop-up window mode
+%       EEG = import_edf(filePath);     % command mode: filePath (cell with character string or character string)
+%       EEG = import_edf(filePath, 1);  % 2nd input to remove DC drifts (1) or not (0)
 %
 % Output: 
 %       EEG structure with raw signal in the EEGLAB format (ready for processing)
