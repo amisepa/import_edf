@@ -13,7 +13,9 @@ GUI mode:
 
 Command line usage:
 
-   eeglab; close; EEG = import_edf;            % import EDF file with pop-up window mode to select the file
+   eeglab; close; 
+   
+   EEG = import_edf;            % import EDF file with pop-up window mode to select the file
    
    or 
    
