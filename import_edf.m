@@ -11,8 +11,9 @@
 %       EEG = import_edf(filePath);     % command mode: filePath (cell with character string or character string)
 %       EEG = import_edf(filePath, 1);  % 2nd input to remove DC drifts (1) or not (0)
 %
-% Output: 
-%       EEG structure with raw signal in the EEGLAB format (ready for processing)
+% Outputs: 
+%       EEG - EEGLAB structure with data, channel labels, sample rate, events, etc.
+%       com - character string for command line use of the function
 %
 % Requirements: Matlab R2020b or later AND the Signal processing toolbox
 %
