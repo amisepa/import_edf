@@ -23,7 +23,7 @@
 % 8.7.2022: fix duplicate seconds (e.g., for edf files with 2 s of data in each cell)
 % 9.28.2022: fix matlab version check and added option to remove DC drifts
 
-function EEG = import_edfdata(inputname, rmdrift)
+function [EEG, lastcom] = import_edf(inputname, rmdrift)
 
 % set remove drift off if not set by user
 if nargin < 2 || isempty(rmdrift)
@@ -182,3 +182,14 @@ end
 
 % Final check
 EEG = eeg_checkset(EEG);
+
+% History string
+com = sprintf('%s = import_edf(%s', filepath);
+for c = fieldnames(opt)'
+    if ischar(opt.(c{:}))
+        com = [com sprintf(', ''%s'', ''%s''', c{:}, opt.(c{:}))];
+    else
+        com = [com sprintf(', ''%s'', %s', c{:}, mat2str(opt.(c{:})))];
+    end
+end
+com = [com ');'];

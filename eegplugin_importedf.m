@@ -37,13 +37,15 @@ end
 vers = 'import_edf1.2';
 
 % path
-addpath(genpath(fileparts(which('import_edfdata.m'))));
+if ~exist('import_edf.m','file')
+    addpath(genpath(fileparts(which('import_edf.m'))));
+end
 
 % Find menu
 menui = findobj(fig, 'tag', 'import data');
 
 % Menu callbacks
-comcnt = [trystrs.no_check 'EEG = import_edfdata;'  catchstrs.new_non_empty];
+comcnt = [trystrs.no_check '[EEG, LASTCOM] = import_edf();'  catchstrs.new_non_empty];
 
 % Create menus
 uimenu(menui, 'label', 'From EDF/EDF+ files (using MATLAB edfread)', 'separator', 'on', 'callback', comcnt);
