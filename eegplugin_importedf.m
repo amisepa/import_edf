@@ -1,10 +1,6 @@
 % eegplugin_importedf() - EEGLAB plugin to import
 % 
-% input: 
-% 
-% output: 
-% 
-% Usage: eegplugin_entropy(fig, trystrs, catchstrs);
+% Usage: eegplugin_importedf(fig, trystrs, catchstrs);
 %
 % Inputs:
 %   fig        - [integer]  EEGLAB figure
