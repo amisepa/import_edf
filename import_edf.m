@@ -156,24 +156,24 @@ end
 EEG = eeg_checkset(EEG);
 
 % Detect flat line segments longer than gapSize (in s)
-gapSize = 0.5;
-for iChan = 1:EEG.nbchan
-    zero_intervals = reshape(find(diff([false abs(diff(EEG.data(iChan,:)))<20*eps false])),2,[])';
-    flatSize = zero_intervals(:,2) - zero_intervals(:,1);
-    flatSeg = zero_intervals(flatSize > gapSize*EEG.srate,:);
-
-    % If space between 2 bad segments is smaller than spacer, merge them into one epoch
-    if size(flatSeg,1) > 1
-        spacer = EEG.srate/10;
-        for iSeg = 2:size(flatSeg,1)
-            if flatSeg(iSeg,1) - flatSeg(iSeg-1,2) <= spacer
-                flatSeg(iSeg,1) = flatSeg(iSeg-1,1);
-                flatSeg(iSeg-1,:) = [];
-            end
-        end
-        flat_seg(iChan,:) = flatSeg;
-    end
-end
+% gapSize = 0.5;
+% for iChan = 1:EEG.nbchan
+%     zero_intervals = reshape(find(diff([false abs(diff(EEG.data(iChan,:)))<20*eps false])),2,[])';
+%     flatSize = zero_intervals(:,2) - zero_intervals(:,1);
+%     flatSeg = zero_intervals(flatSize > gapSize*EEG.srate,:);
+% 
+%     % If space between 2 bad segments is smaller than spacer, merge them into one epoch
+%     if size(flatSeg,1) > 1
+%         spacer = EEG.srate/10;
+%         for iSeg = 2:size(flatSeg,1)
+%             if flatSeg(iSeg,1) - flatSeg(iSeg-1,2) <= spacer
+%                 flatSeg(iSeg,1) = flatSeg(iSeg-1,1);
+%                 flatSeg(iSeg-1,:) = [];
+%             end
+%         end
+%         flat_seg(iChan,:) = flatSeg;
+%     end
+% end
 
 % % Warn about discontinuities that were detected
 % if exist('flat_seg', 'var')
