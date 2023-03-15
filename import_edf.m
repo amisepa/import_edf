@@ -82,11 +82,9 @@ end
 % Detect if data are discontinuous
 idx = varTime > seconds(sPerCell+1);
 if sum(idx) > 0
-    continuous = false;
     warning([num2str(sum(idx)+1) ' discontinuous segments were detected. Merging segments into one continuous one.' ...
         'Boundaries are inserted between segments to correct DC offsets with eeglab  filters (automatic).'])
 else
-    continuous = true;
     % Check sample rate stability
     nSrate = 1./seconds(unique(varTime));
     nSrate(isinf(nSrate)) = [];
@@ -96,12 +94,15 @@ else
 end
 
 % Markers latency and name
-for iEv = 1:size(annot,1)
-    EEG.event(iEv,:).type = char(table2array(annot(iEv,2)));
-    latency = datenum(datetime(table2array(annot(iEv,1)), 'Format', 'HH:mm:ss:SSS'));
-    latency = latency - datenum(edfTime(1));
-    EEG.event(iEv,:).latency = round(latency*24*60*60*sRate);   % latency in sample
-    EEG.event(iEv,:).urevent = iEv;
+if size(annot,1) > 0
+    for iEv = 1:size(annot,1)
+        EEG.event(iEv,:).type = char(table2array(annot(iEv,2)));
+        latency = datetime(table2array(annot(iEv,1)), 'Format', 'HH:mm:ss:SSS') - edfTime(1);
+        latency = floor(seconds(latency)*sRate); % convert to samples
+        if latency == 0, latency = 1; end
+        EEG.event(iEv,:).latency = latency;     
+        EEG.event(iEv,:).urevent = iEv;
+    end
 end
 
 % EEG data
@@ -155,44 +156,6 @@ if ~ischar(chanLabels)
 end
 EEG = eeg_checkset(EEG);
 
-% Detect flat line segments longer than gapSize (in s)
-% gapSize = 0.5;
-% for iChan = 1:EEG.nbchan
-%     zero_intervals = reshape(find(diff([false abs(diff(EEG.data(iChan,:)))<20*eps false])),2,[])';
-%     flatSize = zero_intervals(:,2) - zero_intervals(:,1);
-%     flatSeg = zero_intervals(flatSize > gapSize*EEG.srate,:);
-% 
-%     % If space between 2 bad segments is smaller than spacer, merge them into one epoch
-%     if size(flatSeg,1) > 1
-%         spacer = EEG.srate/10;
-%         for iSeg = 2:size(flatSeg,1)
-%             if flatSeg(iSeg,1) - flatSeg(iSeg-1,2) <= spacer
-%                 flatSeg(iSeg,1) = flatSeg(iSeg-1,1);
-%                 flatSeg(iSeg-1,:) = [];
-%             end
-%         end
-%         flat_seg(iChan,:) = flatSeg;
-%     end
-% end
-
-% % Warn about discontinuities that were detected
-% if exist('flat_seg', 'var')
-%     [~,~,ic] = unique(flat_seg,'rows','stable');   % unique values by row, retaining original order
-%     occ = accumarray(ic, 1);    % count occurrences
-%     maph = occ(ic);             % map occurrences to ic
-%     % x = [flat_seg, maph]          % display occurences for each segment 
-%     % minChan = maph ~= max(occ); % channels that don't share the common discontinuity, likely bad/empty channels    
-%     % warning([ 'Removing a discontinuity (flat segment at least 0.5 s long) common across ' num2str(round(max(occ)/EEG.nbchan*100)) '% of channels. ' ...
-%     %    'These other channels may be flat or bad channels and require close inspection: ' num2str(find(minChan)') ])
-% 
-%     % Remove the common discontinuity(ies)
-% %     oriEEG = EEG;
-% %     idx = find(maph == max(occ));  % channels with the common discontinuities
-% %     EEG = eeg_eegrej(EEG, flat_seg(idx(1),:)); % remove it/them from all channels
-% %     EEG = eeg_eegrej(EEG, flat_seg(1,:)); % remove it/them from all channels
-% %     vis_artifacts(EEG,oriEEG);
-% end
-
 % Remove DC drifts 
 if rmdrift
     disp('Removing DC drifts...');
@@ -200,9 +163,9 @@ if rmdrift
         ft = fft(EEG.data(iChan,:));
         ft(1) = 0;      %zero out the DC component
         EEG.data(iChan,:) = ifft(ft); % Inverse transform back to time domain.
-    %     if mean(real(EEG.data(iChan,:))) > .005 || mean(real(EEG.data(iChan,:))) < -.005
-    %         warning('Mean should be closer to 0, DC drift removal must have failed.')
-    %     end
+        if abs(mean(real(EEG.data(iChan,:)))) > .0005
+            warning('Data mean should be close to 0, DC drift removal must have failed.')
+        end
     end
 end
 
