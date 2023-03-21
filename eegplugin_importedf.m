@@ -30,7 +30,7 @@ if nargin < 3
 end
 
 % plugin version
-vers = 'import_edf1.2';
+vers = 'import_edf1.3';
 
 % path
 if ~exist('import_edf.m','file')
