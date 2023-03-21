@@ -19,9 +19,15 @@ Command line usage:
    
    or 
    
-   EEG = import_edf('path to your file');      % import with full file path provided (char string)
+   EEG = import_edf('path to your file');            % import with full file path provided (char string)
 
-Output: EEG structure in EEGLAB format
+   or
+   
+   EEG = import_edf('path to your file', 1);        % imports and remove DC drifts
+   
+Output: 
+
+   EEG structure in EEGLAB format
 
 
 References for Matlab's edfRead function:
