@@ -40,10 +40,31 @@ if str2double(matver(1:2)) < 20  && ~license('test', 'Signal_Toolbox')
         'or use EEGLAB''s Biosig toolbox']);
 end
 
-% check that user dsoesn't have another edfread funcion downloaded
-tmp = which('edfread');
-if ~strcmp(tmp(end-30:end-2), 'toolbox\signal\signal\edfread')
-    errordlg('You have another edfread function on your computer that may cause errors. Please delete or remove its path.')
+% Make sure there isn't another edfread funcion in Matlab path that could
+% interfere
+% tmp = which('edfread');
+% if ~strcmp(tmp(end-30:end-2), 'toolbox\signal\signal\edfread')
+%     errordlg('You have another edfread function on your computer that may cause errors. Please delete or remove its path.')
+% end
+searchPaths = strsplit(matlabpath, pathsep); % MATLAB search path
+allInstances = {}; 
+for i = 1:length(searchPaths)
+    currentPath = searchPaths{i};
+    possibleFile = fullfile(currentPath, 'edfread.m');
+    if exist(possibleFile, 'file') == 2
+        allInstances{end + 1} = possibleFile;
+    end
+end
+nPaths = length(allInstances);
+if nPaths > 1
+    tmp = regexp(fileparts(allInstances),filesep,'split');
+    folder = cell(nPaths,1);
+    for i = 1:nPaths
+        folder(i) = tmp{i}(end);
+    end
+    toremove = allInstances(~strcmp(folder,'signal'));
+    % errordlg('Another edfread function was detected in your MATLAB path and will likely interfere with import_edf. Please remove the path to: %s',toremove{:})
+    error('Another edfread function was detected in your MATLAB path and will likely interfere with import_edf. Please remove the path to: %s',toremove{:})
 end
 
 % Initialize EEGLAB structure
@@ -156,17 +177,18 @@ if ~ischar(chanLabels)
 end
 EEG = eeg_checkset(EEG);
 
-% Remove DC drifts 
+% Demean signal to remove DC offset 
 if rmdrift
-    disp('Removing DC drifts...');
-    for iChan = 1:EEG.nbchan
-        ft = fft(EEG.data(iChan,:));
-        ft(1) = 0;      %zero out the DC component
-        EEG.data(iChan,:) = ifft(ft); % Inverse transform back to time domain.
-        if abs(mean(real(EEG.data(iChan,:)))) > .0005
-            warning('Data mean should be close to 0, DC drift removal must have failed.')
-        end
-    end
+    disp('De-meaning signal to remove DC offset...');
+    % for iChan = 1:EEG.nbchan
+    %     ft = fft(EEG.data(iChan,:));
+    %     ft(1) = 0;      %zero out the DC component
+    %     EEG.data(iChan,:) = ifft(ft); % Inverse transform back to time domain.
+    %     if abs(mean(real(EEG.data(iChan,:)))) > .0005
+    %         warning('Data mean should be close to 0, DC drift removal must have failed.')
+    %     end
+    % end
+    EEG.data = bsxfun(@minus, EEG.data, trimmean(EEG.data,20,2));
 end
 
 % Final check
