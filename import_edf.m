@@ -177,20 +177,6 @@ if ~ischar(chanLabels)
 end
 EEG = eeg_checkset(EEG);
 
-% Demean signal to remove DC offset 
-if rmdrift
-    disp('De-meaning signal to remove DC offset...');
-    % for iChan = 1:EEG.nbchan
-    %     ft = fft(EEG.data(iChan,:));
-    %     ft(1) = 0;      %zero out the DC component
-    %     EEG.data(iChan,:) = ifft(ft); % Inverse transform back to time domain.
-    %     if abs(mean(real(EEG.data(iChan,:)))) > .0005
-    %         warning('Data mean should be close to 0, DC drift removal must have failed.')
-    %     end
-    % end
-    EEG.data = bsxfun(@minus, EEG.data, trimmean(EEG.data,20,2));
-end
-
 % Final check
 EEG = eeg_checkset(EEG);
 
